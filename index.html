@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#341d35">
+  <title>minha sobremesa :)</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --cream: #e2f4df;
+      --rose: #bce5b8;
+      --pink: #91c98a;
+      --wine: #193323;
+      --glass: rgba(18, 13, 27, .44);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      background: #241529;
+      color: rgba(226, 244, 223, .96);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .backdrop, .tint {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .backdrop {
+      z-index: -2;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 161, 184, .45), transparent 38%),
+        radial-gradient(ellipse at 82% 72%, rgba(155, 87, 142, .5), transparent 42%),
+        linear-gradient(135deg, #28172f, #7b3c5c 52%, #301b36);
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.04);
+    }
+
+    .backdrop.has-photo { opacity: .86; }
+
+    .tint {
+      z-index: -1;
+      background:
+        linear-gradient(115deg, rgba(31, 17, 34, .76), rgba(46, 23, 43, .34) 55%, rgba(28, 17, 34, .65)),
+        linear-gradient(0deg, rgba(30, 15, 32, .35), transparent 60%);
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: .12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+    }
+
+    main {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100svh;
+      min-height: 100dvh;
+      place-items: center;
+      padding:
+        max(24px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+    }
+
+    .card {
+      width: min(100%, 610px);
+      padding: clamp(28px, 6vw, 54px);
+      border: 1px solid rgba(255, 238, 226, .28);
+      border-radius: 22px;
+      background: var(--glass);
+      box-shadow: 0 24px 90px rgba(12, 7, 18, .36), inset 0 1px rgba(255,255,255,.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      text-align: center;
+      animation: arrive .8s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .eyebrow {
+      margin: 0 0 17px;
+      color: rgba(188, 229, 184, .94);
+      font: 600 .76rem/1.4 system-ui, sans-serif;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 18px;
+      font-size: clamp(2.7rem, 9vw, 4.7rem);
+      font-weight: 400;
+      line-height: .98;
+      letter-spacing: -.045em;
+    }
+
+    h2 {
+      margin: 0 auto 27px;
+      max-width: 470px;
+      font-size: clamp(1.65rem, 5vw, 2.25rem);
+      font-weight: 400;
+      line-height: 1.22;
+    }
+
+    .intro, .feedback, .final-copy {
+      color: rgba(226, 244, 223, .84);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+
+    .intro { max-width: 440px; margin: 0 auto 27px; }
+
+    .button {
+      display: inline-flex;
+      min-height: 56px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 25px;
+      border: 0;
+      border-radius: 15px;
+      background: linear-gradient(120deg, #ffd2d7, #f594ad);
+      box-shadow: 0 8px 28px rgba(245, 128, 154, .25);
+      color: #193323;
+      cursor: pointer;
+      font: 700 .98rem/1.2 system-ui, sans-serif;
+      transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+    }
+
+    .button:focus-visible, .answer:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+    .button:disabled { cursor: default; opacity: .75; transform: none; }
+
+    @media (hover: hover) and (pointer: fine) {
+      .button:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 12px 32px rgba(245, 128, 154, .34); }
+      .answer:hover:not(:disabled) { transform: translateX(4px); background: rgba(255,255,255,.14); border-color: rgba(188,229,184,.75); }
+    }
+
+    .quiz-card {
+      width: min(100%, 650px);
+      padding-top: 32px;
+      padding-bottom: 32px;
+    }
+    .quiz-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 29px;
+      color: rgba(226, 244, 223, .78);
+      font: .79rem system-ui, sans-serif;
+    }
+
+    .progress-track {
+      height: 4px;
+      flex: 1;
+      overflow: hidden;
+      border-radius: 4px;
+      background: rgba(255,255,255,.18);
+    }
+
+    .progress {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #bce5b8;
+      transition: width .5s ease;
+    }
+
+    .answers { display: grid; gap: 11px; }
+    .answer {
+      width: 100%;
+      min-height: 56px;
+      padding: 13px 17px;
+      border: 1px solid rgba(255,255,255,.27);
+      border-radius: 13px;
+      background: rgba(255,255,255,.075);
+      color: rgba(226, 244, 223, .96);
+      cursor: pointer;
+      font: 500 .97rem/1.35 system-ui, sans-serif;
+      text-align: left;
+      overflow-wrap: anywhere;
+      transition: transform .18s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .answer:disabled { cursor: default; }
+    .answer.correct { border-color: #a6e3bc; background: rgba(69, 156, 104, .32); animation: pop .42s ease; }
+    .answer.incorrect { border-color: #ffb2b2; background: rgba(179, 66, 88, .34); animation: shake .42s ease; }
+
+    .feedback {
+      min-height: 1.7em;
+      margin: 18px 0 17px;
+      font: 500 .93rem/1.5 system-ui, sans-serif;
+    }
+
+    .feedback.good { color: rgba(195, 241, 209, .94); }
+    .feedback.try-again { color: rgba(210, 237, 190, .94); }
+    .next { min-width: 185px; }
+
+    .final-card { padding-top: clamp(40px, 9vw, 75px); padding-bottom: clamp(40px, 9vw, 75px); }
+    .final-card h1 { font-size: clamp(2.8rem, 10vw, 5.2rem); }
+    .turn-cue {
+      display: inline-block;
+      margin: 18px 0 8px;
+      color: rgba(188, 229, 184, .94);
+      font: 700 clamp(1.1rem, 4vw, 1.45rem)/1.5 system-ui, sans-serif;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    .arrow { display: block; font-size: 2.7rem; animation: point 1.5s ease-in-out infinite; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 380px) {
+      main { padding-right: max(12px, env(safe-area-inset-right)); padding-left: max(12px, env(safe-area-inset-left)); }
+      .card { padding: 25px 18px; border-radius: 19px; }
+      .quiz-card { padding-top: 23px; padding-bottom: 23px; }
+      .quiz-top { gap: 10px; margin-bottom: 23px; }
+      .answer { padding: 13px 14px; }
+    }
+
+    @media (max-height: 700px) {
+      main {
+        place-items: start center;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+      }
+      .card { margin-block: 0; }
+      .quiz-card { padding-top: 22px; padding-bottom: 22px; }
+      .quiz-top { margin-bottom: 20px; }
+      h2 { margin-bottom: 20px; }
+      .answers { gap: 8px; }
+    }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes pop { 50% { transform: scale(1.025); } }
+    @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+    @keyframes pulse { 50% { text-shadow: 0 0 23px rgba(255,190,206,.75); transform: scale(1.04); } }
+    @keyframes point { 50% { transform: translateY(9px); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+  <div class="tint" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main>
+    <section class="card" id="start-screen" aria-labelledby="welcome-title">
+      <p class="eyebrow"> (＾_＾)</p>
+      <h1 id="welcome-title">Ana, meu amorzinho<span aria-hidden="true"> </span></h1>
+      <p class="intro">Preparei um quiz sobre a gente. Vamos ver se a memória tá boa</p>
+      <button class="button" id="start-button" type="button">Começar o quiz <span aria-hidden="true">♡</span></button>
+    </section>
+
+    <section class="card quiz-card hidden" id="quiz-screen" aria-labelledby="question-title" aria-live="polite">
+      <div class="quiz-top">
+        <span id="question-count">Pergunta 1 de 5</span>
+        <div class="progress-track" role="progressbar" aria-label="Progresso do quiz" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress" id="progress"></div>
+        </div>
+      </div>
+      <p class="eyebrow">Nós</p>
+      <h2 id="question-title"></h2>
+      <div class="answers" id="answers"></div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+      <button class="button next hidden" id="next-button" type="button">Próxima lembrança <span aria-hidden="true">→</span></button>
+    </section>
+
+    <section class="card final-card hidden" id="final-screen" aria-labelledby="final-title">
+      <p class="eyebrow">E agora, a última surpresa</p>
+      <p class="final-copy">Mas, para te mostrar, tu vai precisar</p>
+      <div class="turn-cue">virar para trás</div>
+    </section>
+  </main>
+
+  <script>
+    
+    const questions = [
+      {
+        question: "Qual foi a data que a gente começou(convenção entre nós)?",
+        answers: ["21 de maio", "27 de junho", "26 de abril"],
+        correct: 2
+      },
+      {
+        question: "Qual foi a música que eu mais dediquei pra ti?",
+        answers: ["Star shopping(Lil peep)", "Flaws and sins(Juice wrld)", "Me encontra(CBJR)"],
+        correct: 1
+      },
+      {
+        question: "Qual foi a festa da six que eu sai destruido(mas dei uma bela animada depois🤭)?",
+        answers: ["Mc davi", "Ryu the runner", "Menó K"],
+        correct: 0
+      },
+      {
+        question: "Qual foi a música que tu fez uma coreografia pra mim?",
+        answers: ["Lucid Dreams(juice wrld)", "Star shopping(lil peep)", "Nuts(lil peep)"],
+        correct: 2
+      },
+      {
+        question: "Qual foi o grande pontapé da coisa toda?",
+        answers: ["o pierre vazar do lugar dele", "o skate", "fortnite"],
+        correct: 0
+      },
+      {
+        question: "Qual foi a mentira descarada que eu contei depois da segunda skeitada contigo?",
+        answers: ["não sou mt de tomar remédio tmb", "odeio pista cheia", "eu dei a bunda pro pedro"],
+        correct: 0
+      }
+    ];
+
+    const startScreen = document.querySelector("#start-screen");
+    const quizScreen = document.querySelector("#quiz-screen");
+    const finalScreen = document.querySelector("#final-screen");
+    const questionTitle = document.querySelector("#question-title");
+    const answersElement = document.querySelector("#answers");
+    const feedback = document.querySelector("#feedback");
+    const nextButton = document.querySelector("#next-button");
+    const questionCount = document.querySelector("#question-count");
+    const progress = document.querySelector("#progress");
+    const progressTrack = document.querySelector(".progress-track");
+    const backdrop = document.querySelector("#backdrop");
+    const photos = [
+      "images/034dd162-078c-4498-b626-984487196606.JPG",
+      "images/1000029268.JPG",
+      "images/1000029346.JPG",
+      "images/1000029527.JPG",
+      "images/1000030081.JPG",
+      "images/1000030093.JPG",
+      "images/1000030102.JPG",
+      "images/1000030671.JPG",
+      "images/1000031106.JPG",
+      "images/1000031108.JPG",
+      "images/1000033666.JPG",
+      "images/1000034185.JPG",
+      "images/1000034191.JPG",
+      "images/1000034408.JPG",
+      "images/1000034446.JPG",
+      "images/1000034705.JPG",
+      "images/1000034708.JPG",
+      "images/1000035678.JPG",
+      "images/1000035679.JPG",
+      "images/1000035689.JPG",
+      "images/1000035693.JPG",
+      "images/1000035696.JPG",
+      "images/1000035700.JPG",
+      "images/1000035701.JPG",
+      "images/1000035709.JPG",
+      "images/1000037197.JPG",
+      "images/1000037232.JPG",
+      "images/eb4cec3f-1087-4f24-b52c-0a759573b321.JPG",
+      "images/IMG_1754.jpg",
+      "images/IMG_1755.jpg",
+      "images/IMG_1795.jpg",
+      "images/IMG_1808.jpg",
+      "images/IMG_1812.jpg",
+      "images/IMG_1859.jpg",
+      "images/IMG_2049.jpg",
+      "images/IMG_2132.jpg",
+      "images/IMG_2237.jpg",
+      "images/IMG_2439.jpg"
+    ];
+    let currentQuestion = 0;
+    let photoIndex = 0;
+
+    function showQuestion() {
+      const item = questions[currentQuestion];
+      questionTitle.textContent = item.question;
+      questionCount.textContent = `Pergunta ${currentQuestion + 1} de ${questions.length}`;
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      progress.style.width = `${percent}%`;
+      progressTrack.setAttribute("aria-valuenow", String(percent));
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      nextButton.classList.add("hidden");
+      answersElement.replaceChildren();
+
+      item.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.type = "button";
+        button.textContent = answer;
+        button.addEventListener("click", () => selectAnswer(index));
+        answersElement.append(button);
+      });
+    }
+
+    function selectAnswer(selected) {
+      const item = questions[currentQuestion];
+      const choices = [...answersElement.querySelectorAll(".answer")];
+      choices.forEach((choice, index) => {
+        choice.disabled = true;
+        if (index === item.correct) choice.classList.add("correct");
+        if (index === selected && selected !== item.correct) choice.classList.add("incorrect");
+      });
+
+      const isCorrect = selected === item.correct;
+      feedback.textContent = isCorrect
+        ? ["Isso! boa memória ", " (: ", "Boa!"][Math.floor(Math.random() * 3)]
+        : "Quase! o importante é lembrar ";
+      feedback.classList.add(isCorrect ? "good" : "try-again");
+      nextButton.textContent = currentQuestion === questions.length - 1 ? "Ver a surpresa final " : "Próxima lembrança ";
+      nextButton.classList.remove("hidden");
+      nextButton.focus();
+    }
+
+    document.querySelector("#start-button").addEventListener("click", () => {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      showQuestion();
+    });
+
+    nextButton.addEventListener("click", () => {
+      currentQuestion += 1;
+      if (currentQuestion >= questions.length) {
+        quizScreen.classList.add("hidden");
+        finalScreen.classList.remove("hidden");
+        progress.style.width = "100%";
+        progressTrack.setAttribute("aria-valuenow", "100");
+        return;
+      }
+      showQuestion();
+      questionTitle.focus?.();
+    });
+
+    const showNextPhoto = () => {
+      backdrop.style.backgroundImage = `url("${photos[photoIndex]}")`;
+      backdrop.classList.add("has-photo");
+      photoIndex = (photoIndex + 1) % photos.length;
+    };
+    showNextPhoto();
+    setInterval(showNextPhoto, 7000);
+  </script>
+</body>
+</html>
